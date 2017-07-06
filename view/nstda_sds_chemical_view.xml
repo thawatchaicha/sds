@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+	<data>
+	
+		<record model="ir.ui.view" id="view_nstda_sds_chemical_form">
+			<field name="name">nstda.sds.chemical.form</field>
+			<field name="model">nstda.sds.chemical</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="nstda_sds_chemical" create="true" delete="true"
+					edit="true">
+				<sheet>
+					<group>
+					
+<!-- 						<field name="co_chem_type" style="width: 200px" -->
+<!-- 								attrs="{'readonly':[('sds_html_link','!=',False)]}" /> -->
+					
+						<label for="cas_no" string="CAS No." />
+							<div>
+								<field name="cas_no" style="width: 200px" />
+								<button name="search_sigma_cas" type="object" string="Search"
+								attrs="{'invisible':[('sds_html_link','!=',False)]}" ></button>
+<!-- 								<button name="search_merck_cas" type="object" string="Search"  -->
+<!-- 								attrs="{'invisible':['|',('co_chem_type','!=','MERCK'),('sds_html_link','!=',False)]}" ></button> -->
+							</div>
+						
+						<label for="product_name" string="ชื่อผลิตภัณฑ์/ชื่อทางการค้า" />
+							<div>
+							<field name="product_name" style="width: 350px" />
+							<button name="search_sigma_name" type="object" string="Search"
+							attrs="{'invisible':[('sds_html_link','!=',False)]}" ></button>
+<!-- 							<button name="search_merck_name" type="object" string="Search"  -->
+<!-- 							attrs="{'invisible':['|',('co_chem_type','!=','MERCK'),('sds_html_link','!=',False)]}" ></button> -->
+							</div>
+
+						<field name="chem_name" style="width: 350px" />
+						<field name="chem_other_name" />
+						<field name="hazardous_substances" style="width: 200px" />
+						<field name="state_of_matter" style="width: 200px" />
+						<field name="chem_properties" style="width: 350px"/>
+						<field name="chem_iata" style="width: 350px" />
+						<field name="hazard_statement" />
+						<field name="chem_amount" style="width: 350px" />
+
+						<field name="sds_html_link" widget="url" readonly="1" style="width: 440px" />
+								
+						<label string="เอกสารจัดเก็บ **" for='safety_ds_file_ids'
+							colspan="6" />
+						<field name="safety_ds_file_ids" colspan="6">
+							<form string="Create: Files" version="7.0">
+								<group>
+									<group>
+										<field name="name" string="ชื่อเอกสาร" required='1'
+											invisible="0" />
+										<field name="res_model" string="Model" invisible="1" />
+										<field name="datas_fname" invisible="1" string="ชื่อเอกสาร" />
+										<field name="datas" filename="name,datas_fname" string="เลือกเอกสาร(ไฟล์แนบ)"
+											required='1'
+											context="{'res_model': 'nstda.sds.chemical', 'filter': 'pdf,doc,docx,html', 'size_limit': '2'}" />
+									</group>
+								</group>
+								<span>
+									* รองรับไฟล์นามสกุล
+									<span class="oe_inline">pdf,doc,docx,html
+									</span>
+									ขนาดไม่เกิน
+									<span class="oe_inline">2</span>
+									Mb
+								</span>
+							</form>
+							<tree>
+								<field name="name" string="ชื่อเอกสาร" required='1' />
+								<field name="datas_fname" invisible="1" />
+								<field name="datas" filename="datas_fname" string="ชื่อเอกสาร(ไฟล์แนบ)"
+									required='1' />
+							</tree>
+						</field>
+			
+						<label string="" colspan="6" />
+						<div>
+							<separator string="ห้องปฏิบัติการ" colspan="6" />
+						</div>
+
+						<field name="lab_dpm_ids" colspan="6" nolabel="1" widget="many2many_tags" options="{'create': true, 'create_edit': true}" />
+						
+					</group>
+					
+						
+					<hr />
+					<footer>
+						<group>
+							<group>
+								<label for="create_uid" string="Create By" />
+								<div>
+									<field name="create_uid" string="Create By" readonly="1" />
+								</div>
+								<field name="create_date" string="Time" readonly="1" />
+							</group>
+							<group>
+								<label for="write_uid" string="Update By" />
+								<div>
+									<field name="write_uid" string="Update By" readonly="1" />
+								</div>
+								<field name="write_date" string="Time" readonly="1" />
+							</group>
+						</group>
+					</footer>
+					
+				</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="view_nstda_sds_chemical_tree">
+			<field name="name">nstda.sds.chemical.tree</field>
+			<field name="model">nstda.sds.chemical</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="nstda_sds_chemical_tree" create="true" delete="true" editable="top" >
+						<field name="cas_no" attrs="{'required':[('cas_no','=',False)]}" readonly="1" clickable="False" />
+						<field name="product_name" attrs="{'required':[('product_name','=',False)]}" readonly="1" clickable="False" />
+						<field name="chem_name" attrs="{'required':[('chem_name','=',False)]}" readonly="1" clickable="False" />
+						<field name="chem_amount" />
+						<field name="lab_dpm_ids" string="ห้องปฏิบัติการ" widget="many2many_tags" />
+				</tree>
+			</field>			
+		</record>
+		
+	</data>
+</openerp>

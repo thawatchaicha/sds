@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+	<data>
+	
+		<record model="ir.ui.view" id="view_nstda_sds_labdepartment_form">
+			<field name="name">nstda.sds.labdepartment.form</field>
+			<field name="model">nstda.sds.labdepartment</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form create="true" delete="true" edit="true">
+				<sheet>
+					<group>
+						<field name="lab_dpm_id" />
+						<field name="storage_place" style="width: 200px" placeholder="กรุณากรอก ห้องที่เก็บรักษา" />
+						<field name="lab_dpm_name" invisible="1" />
+						<field name="lab_storage" invisible="1" />
+						<field name="dpm_lab_ids"  widget="many2many_tags" attrs="{'invisible':[('storage_place','=',False)]}" />
+					</group>
+				</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="view_nstda_sds_labdepartment_tree">
+			<field name="name">nstda.sds.labdepartment.tree</field>
+			<field name="model">nstda.sds.labdepartment</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="nstda_sds_labdepartment_tree" create="true" delete="true" editable="top" >
+						<field name="lab_dpm_id" attrs="{'required':[('dpm_lab_ids','=',False)]}" clickable="False" />
+						<field name="storage_place" attrs="{'required':[('dpm_lab_ids','=',False)]}" clickable="False" />
+						<field name="lab_dpm_name" invisible="1" />
+						<field name="lab_storage" invisible="1" />
+						<field name="dpm_lab_ids" widget="many2many_tags" attrs="{'invisible':[('storage_place','=',False)]}" />
+				</tree>
+			</field>			
+		</record>
+		
+	</data>
+</openerp>

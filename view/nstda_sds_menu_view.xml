@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+	<data>
+
+		<menuitem name="MSDS" id="menu_nstda_sds" groups="nstdaperm.group_nstda_org02" />
+		<menuitem name="Menu" id="menu_nstda_sds_main" parent="menu_nstda_sds" sequence="1" />
+		<menuitem name="ข้อมูล Master" id="menu_nstda_sds_administrator" parent="menu_nstda_sds" sequence="2" 
+					groups="base.group_nstda_sds_user" />
+		
+		<!-- Search View -->
+		<record model="ir.ui.view" id="nstda_sds_chemical_search_view">
+			<field name="name">nstda.sds.chemical.search</field>
+			<field name="model">nstda.sds.chemical</field>
+			<field name="arch" type="xml">
+				<search string="Search">
+					<field string="ทั้งหมด" name="cas_no"
+							filter_domain="['|','|',
+							('cas_no','ilike',self),
+			                ('product_name','ilike',self),
+			                ('chem_name','ilike',self),
+							]" />
+					<field name="cas_no" string="CAS No" filter_domain="[('cas_no','ilike',self)]" />
+					<field name="product_name" string="ชื่อผลิตภัณฑ์/ชื่อทางการค้า" filter_domain="[('product_name','ilike',self)]" />
+					<field name="chem_name" string="ชื่อสารเคมีอันตราย" filter_domain="[('chem_name','ilike',self)]" />
+
+						<group expand="0" string="Group By">
+                        <filter string="CAS No" domain="[]" context="{'group_by':'cas_no'}"/>
+                        <filter string="ชื่อผลิตภัณฑ์/ชื่อทางการค้า" domain="[]" context="{'group_by':'product_name'}"/>
+                        <filter string="ชื่อสารเคมีอันตราย" domain="[]" context="{'group_by':'chem_name'}"/>
+                        </group>
+
+						<group expand="0" string="Filter">
+						<filter name="filter_create_uid" string="My" domain="[('create_uid','=',uid)]" />
+						</group>
+
+				</search>
+			</field>
+		</record>
+		
+		
+		<!-- Search View -->
+		<record model="ir.ui.view" id="nstda_sds_labdepartment_search_view">
+			<field name="name">nstda.sds.labdepartment.search</field>
+			<field name="model">nstda.sds.labdepartment</field>
+			<field name="arch" type="xml">
+				<search string="Search">
+				
+					<field string="ทั้งหมด" name="lab_storage"
+							filter_domain="['|','|',
+							('lab_dpm_id','ilike',self),
+			                ('storage_place','ilike',self),
+			                ('lab_storage','ilike',self),
+							]" />
+					<field name="lab_storage" string="ห้องปฏิบัติการ" filter_domain="[('lab_dpm_id','ilike',self)]" />
+					<field name="storage_place" string="ห้องที่เก็บรักษา" filter_domain="[('storage_place','ilike',self)]" />
+					<field name="lab_dpm_id" string="Lab (Department)" filter_domain="[('lab_dpm_id','ilike',self)]" />
+
+						<group expand="0" string="Group By">
+                        <filter string="ห้องปฏิบัติการ" domain="[]" context="{'group_by':'lab_dpm_id'}"/>
+                        <filter string="ห้องที่เก็บรักษา" domain="[]" context="{'group_by':'storage_place'}"/>
+                        </group>
+
+						<group expand="0" string="Filter">
+						<filter name="filter_create_uid" string="My" domain="[('create_uid','=',uid)]" />
+						</group>
+
+				</search>
+			</field>
+		</record>
+		
+
+		<record model="ir.actions.act_window" id="action_nstda_sds_chemical">
+			<field name="name">สารเคมี/รังสี/แก๊ส ที่ใช้ใน LAB - MSDS</field>
+			<field name="res_model">nstda.sds.chemical</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_id" ref="view_nstda_sds_chemical_tree" />
+<!-- 			<field name="context" eval="{'default_service': 0, 'search_default_filter_lab_dpm_id':0}"/> -->
+<!-- 			<field name="search_view_id" ref="nstda_sds_chemical_search_view" /> -->
+		</record>
+			
+		<menuitem name="All-MSDS" id="menu_nstda_sds_chemical"
+			action="action_nstda_sds_chemical" parent="menu_nstda_sds_main"
+			sequence="2" />
+			
+			
+		<record model="ir.actions.act_window" id="action_nstda_sds_chemical_self">
+			<field name="name">สารเคมี/รังสี/แก๊ส ที่ใช้ใน LAB - MSDS</field>
+			<field name="res_model">nstda.sds.chemical</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+<!-- 			<field name="context">{'search_default_filter_lab_dpm_id': 1}</field> -->
+			<field name="context" eval="{'default_service': 0, 'search_default_filter_create_uid':1}"/>
+			<field name="search_view_id" ref="nstda_sds_chemical_search_view" />
+			<field name="view_id" ref="view_nstda_sds_chemical_tree" />
+			<field name="domain">[('lab_dpm_ids','!=',False)]</field>
+		</record>
+			
+		<menuitem name="In Lab-MSDS" id="menu_nstda_sds_chemical_self"
+			action="action_nstda_sds_chemical_self" parent="menu_nstda_sds_main"
+			sequence="1" />
+			
+		<record model="ir.actions.act_window" id="action_nstda_sds_labdepartment">
+			<field name="name">สารเคมี/รังสี/แก๊ส ที่ใช้ใน LAB - MSDS</field>
+			<field name="res_model">nstda.sds.labdepartment</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="search_view_id" ref="nstda_sds_labdepartment_search_view" />
+<!-- 			<field name="context" eval="{'default_service': 0, 'search_default_filter_lab_dpm_id':0}"/> -->
+<!-- 			<field name="search_view_id" ref="nstda_sds_chemical_search_view" /> -->
+		</record>
+			
+		<menuitem name="สารเคมีในห้องปฏิบัติการ" id="menu_nstda_sds_labdepartment"
+			action="action_nstda_sds_labdepartment" parent="menu_nstda_sds_main"
+			sequence="3" groups="base.group_nstda_sds_user" />
+			
+			
+	</data>
+</openerp>
