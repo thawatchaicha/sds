@@ -47,6 +47,7 @@ class nstda_sds_labdepartment(models.Model):
     ]
     
     
+    @api.one
     @api.depends('lab_dpm_name','storage_place')
     def cc_lab_storage(self):
         self.lab_storage = (self.lab_dpm_name or "")+ ' - ' +(self.storage_place or "")

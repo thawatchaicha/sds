@@ -1,16 +1,26 @@
 # -*- coding: utf-8 -*-
-from openerp import models, fields, api, exceptions, _
-import datetime
-from datetime import datetime, timedelta
-from dateutil import relativedelta as rdelta
-from openerp.tools.translate import _
-from email import _name
-from bsddb.dbtables import _columns
-from openerp import tools
-import re
-from openerp import SUPERUSER_ID
+from openerp import tools, models, fields, api, exceptions, _
+from pickle import TRUE
+from _ctypes import sizeof
 from docutils.parsers import null
+from pychart.tick_mark import Null
+from dateutil import parser
+
+from datetime import datetime, timedelta
+from datetime import datetime
+from dateutil import relativedelta as rdelta
+from openerp.osv import osv
+
+import time
+import re
+
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from openerp.exceptions import except_orm, Warning, RedirectWarning
+from openerp import http
+from openerp.http import request
+from openerp.exceptions import ValidationError
+import collections
 import urllib2
 import urllib
 import HTMLParser
@@ -32,15 +42,15 @@ class nstda_sds_chemical(models.Model):
         return len(res)
     
     
-    @api.multi
+    @api.one
     def search_sigma_cas(self, values):
         
         sid = self.id
         h = HTMLParser.HTMLParser()
         
         try:
-            get_cas_no = self.cas_no
-            cas_pattern = r"\d{2,7}-\d{2}-\d{1}"
+            get_cas_no = self.cas_no2.cas_no
+            cas_pattern = r"(?!0)\d{2,7}-\d{2}-\d{1}(?!.)"
             if re.match(cas_pattern, get_cas_no):
                 pass
             else:
@@ -157,7 +167,7 @@ class nstda_sds_chemical(models.Model):
             pass
         
         
-    @api.multi
+    @api.one
     def search_merck_cas(self, values):
         
         google_api = 'cx=004752995973544010898:ur2svigrmjs&key=AIzaSyDK6K1GGvHS7Xn8vU_Xfz4e__KtXZJoAns'
@@ -166,7 +176,7 @@ class nstda_sds_chemical(models.Model):
         h = HTMLParser.HTMLParser()
         
         try:
-            get_cas_no = self.cas_no
+            get_cas_no = self.cas_no2.cas_no
             cas_pattern = r"\d{2,7}-\d{2}-\d{1}"
             if re.match(cas_pattern, get_cas_no):
                 pass
@@ -175,11 +185,11 @@ class nstda_sds_chemical(models.Model):
         except:
             raise Warning('เลขทะเบียน CAS จะเป็นกลุ่มตัวเลข 3ชุด คั่นด้วยเครื่องหมายลบ(-), โดยเลขชุดแรกจะประกอบไปด้วยจำนวนตัวเลข 2-7ตัว, ชุดที่สอง 2ตัว และชุดที่สาม 1ตัว')
     
-            msds_content = 'https://www.googleapis.com/customsearch/v1?q=chemtrack.org/MSDSSG/Merck/msdst/'+get_cas_no+'&'+google_api
+        msds_content = 'https://www.googleapis.com/customsearch/v1?q=chemtrack.org/MSDSSG/Merck/msdst/'+get_cas_no+'&'+google_api
             
         try:
             geturlcontent = str(urllib2.urlopen(msds_content).read())
-        except:
+        except urllib2.HTTPError, e:
             raise Warning(e.fp.read())
         
         msds_re = ur'(http:\/\/www\.chemtrack\.org\/MSDSSG\/Merck\/msdst\/.*?\.htm).*?('+get_cas_no+')'
@@ -188,8 +198,7 @@ class nstda_sds_chemical(models.Model):
         try:
             msds_content = re.search(msds_search,geturlcontent).group(1)
         except:
-            self.search_sigma_cas(self)
-            return
+            raise Warning('ไม่พบ MSDS ดังกล่าว')
         
         try:
             urllib2.urlopen(msds_content)
@@ -303,7 +312,7 @@ class nstda_sds_chemical(models.Model):
             self.chem_iata = "ไม่อันตราย"
           
             
-    @api.multi
+    @api.one
     def search_sigma_name(self, values):
         
         google_api = 'cx=004752995973544010898:ur2svigrmjs&key=AIzaSyDK6K1GGvHS7Xn8vU_Xfz4e__KtXZJoAns'
@@ -322,7 +331,7 @@ class nstda_sds_chemical(models.Model):
         try:
             webContent = urllib2.urlopen(msds_content).read()
             geturlcontent = str(webContent)
-        except:
+        except urllib2.HTTPError, e:
             raise Warning(e.fp.read())
         
         msds_re = ur'(http:\/\/www\.chemtrack\.org\/MSDSSG\/Trf\/msdst\/msdst(.*?)\.html).*?('+re.escape(get_product_name)+')'
@@ -439,7 +448,7 @@ class nstda_sds_chemical(models.Model):
             pass
 
     
-    @api.multi
+    @api.one
     def search_merck_name(self, values):
         
         google_api = 'cx=004752995973544010898:ur2svigrmjs&key=AIzaSyDK6K1GGvHS7Xn8vU_Xfz4e__KtXZJoAns'
@@ -457,7 +466,7 @@ class nstda_sds_chemical(models.Model):
 
         try:
             geturlcontent = str(urllib2.urlopen(msds_content).read())
-        except:
+        except urllib2.HTTPError, e:
             raise Warning(e.fp.read())
         
         msds_re = ur'(http:\/\/www\.chemtrack\.org\/MSDSSG\/Merck\/msdst\/.*?\.htm).*?('+re.escape(get_product_name)+')'
@@ -466,8 +475,7 @@ class nstda_sds_chemical(models.Model):
         try:
             msds_content = re.search(msds_search,geturlcontent).group(1)
         except:
-            self.search_merck_name(self)
-            return
+            raise Warning('ไม่พบ MSDS ดังกล่าว')
         
         try:
             urllib2.urlopen(msds_content)
@@ -582,6 +590,7 @@ class nstda_sds_chemical(models.Model):
 
     _name = 'nstda.sds.chemical'
     _rec_name = 'product_name'
+    _order = 'cas_no ASC'
     _inherit = ['ir.needaction_mixin']
     
     co_chem_type = fields.Selection([
@@ -590,9 +599,10 @@ class nstda_sds_chemical(models.Model):
                                      ], string="บริษัทผู้ผลิต")
     chem_name = fields.Char('ชื่อสารเคมีอันตราย')
     chem_other_name = fields.Text('ชื่อพ้องอื่นๆ')
-    product_name = fields.Char('ชื่อผลิตภัณฑ์/ชื่อทางการค้า')
+    product_name = fields.Char('ชื่อผลิตภัณฑ์/ทางการค้า')
     hazardous_substances = fields.Char('สูตรเคมี/สูตรโมเลกูล')
-    cas_no = fields.Char('CAS No.', size=12)
+    cas_no = fields.Char('CAS No.', size=12, readonly=True, compute='set_cas_no', store=True)
+    cas_no2 = fields.Many2one('nstda.sds.chemcasno', string='CAS No.', size=12, require=False, domain=[('is_search_success', '!=', False),('cas_no', 'not like', '0%-__-_')])
     chem_properties = fields.Selection([
                                         ("ประเภท:1", "Class 1"),
                                         ("ประเภท:2", "Class 2"),
@@ -625,21 +635,34 @@ class nstda_sds_chemical(models.Model):
     sds_html_link = fields.Char('ข้อมูลความปลอดภัย (SDS)')
     
     lab_dpm_ids = fields.Many2many('nstda.sds.labdepartment', 'nstda_sds_chemical_labdepartment_rel', 'lab_dpm_ids', 'dpm_lab_ids', 'ห้องปฏิบัติการ', ondelete="cascade")
-    lab_user = fields.Boolean('Check Lab',compute = '_check_group')
+    is_lab_user = fields.Boolean('Check Lab',compute = '_in_lab_user')
     
     _sql_constraints = [
-                        ('cas_no_unique', 'unique(cas_no)', 'Cas No. มีอยู่ในระบบแล้ว')
+                        ('cas_no_unique', 'unique(cas_no)', 'Cas No. มีอยู่ในระบบแล้ว'),
+                        ('cas_no2_unique', 'unique(cas_no2)', 'Cas No. มีอยู่ในระบบแล้ว'),
     ]
-
-
+    
+    
+    @api.constrains('sds_html_link')
+    def _check_sds_html_link(self):
+        if self.sds_html_link == False or self.sds_html_link is None:
+            raise ValidationError("ไม่สามารถบันทึกข้อมูลได้")
+        
+    
     @api.one
-    @api.depends('lab_dpm_ids')    
-    def _check_group(self):
-        self.lab_user = False
-        obj_user = self.env['nstdamas.employee'].search([('emp_rusers_id','=',self._uid)])
-        for i in obj_user.lab_dpm_ids:
-            if self.lab_dpm_ids == i.emp_dpm_id:
-                self.lab_user = True
+    @api.onchange('cas_no2')
+    @api.depends('cas_no2')
+    def set_cas_no(self):
+        if (self.cas_no2.cas_no):
+            self.cas_no = self.cas_no2.cas_no
+            
+    
+    @api.one
+    @api.onchange('user_id')
+    def _in_lab_user(self):
+        user_id = self.env['nstdamas.employee'].search([('emp_rusers_id', '=', self._uid)])
+        if (user_id):
+            user_dpm = user_id.emp_dpm_id.id
 
 
     @api.model

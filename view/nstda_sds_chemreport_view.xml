@@ -33,21 +33,5 @@
 		</record>
 		
 		
-		<record model="ir.actions.act_window" id="action_nstda_sds_chemical_mas">
-			<field name="name">Master View</field>
-			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">nstdamas.department</field>
-			<field name="view_type">form</field>
-			<field name="view_mode">form,tree</field>
-			<field name="view_id" ref="view_nstda_sds_chemical_mas_tree" />
-			<field name="domain">[('dpm_id','=like','2%')]</field>
-		</record>
-		
-
-		<menuitem id="menu_nstda_sds_chemical_mas_tree" name="ห้องปฏิบัติการ (Department)"
-			parent="menu_nstda_sds_administrator" action="action_nstda_sds_chemical_mas"
-			sequence="4" groups="base.group_nstda_sds_user" />
-		
-		
 	</data>
 </openerp>

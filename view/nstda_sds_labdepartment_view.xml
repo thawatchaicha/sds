@@ -2,12 +2,13 @@
 <openerp>
 	<data>
 	
+	
 		<record model="ir.ui.view" id="view_nstda_sds_labdepartment_form">
 			<field name="name">nstda.sds.labdepartment.form</field>
 			<field name="model">nstda.sds.labdepartment</field>
 			<field name="type">form</field>
 			<field name="arch" type="xml">
-				<form create="true" delete="true" edit="true">
+				<form string="nstda_sds_labdepartment_form" create="true" delete="true" edit="true">
 				<sheet>
 					<group>
 						<field name="lab_dpm_id" />
@@ -21,20 +22,59 @@
 			</field>
 		</record>
 
+
 		<record model="ir.ui.view" id="view_nstda_sds_labdepartment_tree">
 			<field name="name">nstda.sds.labdepartment.tree</field>
 			<field name="model">nstda.sds.labdepartment</field>
 			<field name="type">tree</field>
 			<field name="arch" type="xml">
 				<tree string="nstda_sds_labdepartment_tree" create="true" delete="true" editable="top" >
-						<field name="lab_dpm_id" attrs="{'required':[('dpm_lab_ids','=',False)]}" clickable="False" />
-						<field name="storage_place" attrs="{'required':[('dpm_lab_ids','=',False)]}" clickable="False" />
-						<field name="lab_dpm_name" invisible="1" />
-						<field name="lab_storage" invisible="1" />
-						<field name="dpm_lab_ids" widget="many2many_tags" attrs="{'invisible':[('storage_place','=',False)]}" />
+					<field name="lab_dpm_id" attrs="{'required':[('dpm_lab_ids','=',False)]}" clickable="False" />
+					<field name="storage_place" attrs="{'required':[('dpm_lab_ids','=',False)]}" clickable="False" />
+					<field name="lab_dpm_name" invisible="1" />
+					<field name="lab_storage" invisible="1" />
+					<field name="dpm_lab_ids" widget="many2many_tags" attrs="{'invisible':[('storage_place','=',False)]}" />
 				</tree>
 			</field>			
 		</record>
+		
+		
+		<!-- Search View -->
+		<record model="ir.ui.view" id="view_nstda_sds_labdepartment_search">
+			<field name="name">nstda.sds.labdepartment.search</field>
+			<field name="model">nstda.sds.labdepartment</field>
+			<field name="arch" type="xml">
+				<search string="Search">
+
+					<field string="ทั้งหมด" name="lab_storage"
+						filter_domain="['|','|',
+							('lab_dpm_id','ilike',self),
+			                ('storage_place','ilike',self),
+			                ('lab_storage','ilike',self),
+							]" />
+					<field name="lab_storage" string="ห้องปฏิบัติการ"
+						filter_domain="[('lab_dpm_id','ilike',self)]" />
+					<field name="storage_place" string="ห้องที่เก็บรักษา"
+						filter_domain="[('storage_place','ilike',self)]" />
+					<field name="lab_dpm_id" string="Lab (Department)"
+						filter_domain="[('lab_dpm_id','ilike',self)]" />
+
+					<group expand="0" string="Group By">
+						<filter string="ห้องปฏิบัติการ" domain="[]"
+							context="{'group_by':'lab_dpm_id'}" />
+						<filter string="ห้องที่เก็บรักษา" domain="[]"
+							context="{'group_by':'storage_place'}" />
+					</group>
+
+					<group expand="0" string="Filter">
+						<filter name="filter_create_uid" string="My"
+							domain="[('create_uid','=',uid)]" />
+					</group>
+
+				</search>
+			</field>
+		</record>
+		
 		
 	</data>
 </openerp>
