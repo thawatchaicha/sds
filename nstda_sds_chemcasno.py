@@ -22,7 +22,7 @@ class nstda_sds_chemcasno(models.Model):
     
     cas_no = fields.Char('CAS No.', size=12, require=True)
     product_name = fields.Char('ชื่อผลิตภัณฑ์/ชื่อทางการค้า')
-    is_search_success = fields.Boolean('Is Search Success ?', default=False, compute='set_is_search_success')
+    is_search_success = fields.Boolean('Is Search Success ?', default=False, store=True, compute='set_is_search_success')
     
     _sql_constraints = [
                         ('cas_no_unique', 'unique(cas_no)', 'CAS Number มีอยู่ในระบบแล้ว'),

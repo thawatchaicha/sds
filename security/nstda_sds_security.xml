@@ -11,20 +11,11 @@
 <!-- 			<field name="implied_ids" eval="[]" /> -->
 <!-- 		</record> -->
 		
-		<record model="res.groups" id="nstdaperm.group_nstda_org02">
-			<field name="implied_ids" eval="[(4, ref('base.group_nstda_sds_user'))]" />
-		</record>
-		
 		<record model="res.groups" id="base.group_nstda_sds_admin">
 			<field name="name">Admin</field>
 			<field name="category_id" ref="module_category_nstda_sds" />
 			<field name="implied_ids" eval="[
 				(4, ref('base.group_nstda_sds_user'))
-				]" />
-			<field name="users"
-				eval="[
-				(4, ref('nstdaperm.group_nstda_emp003249')),
-				(4, ref('nstdaperm.group_nstda_emp001033')),
 				]" />
 		</record>
 	

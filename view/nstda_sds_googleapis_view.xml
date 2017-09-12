@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<openerp>
+	<data>
+
+
+		<record model="ir.ui.view" id="view_nstda_sds_googleapis_form">
+			<field name="name">nstda.sds.googleapis.form</field>
+			<field name="model">nstda.sds.googleapis</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<form string="Add new API Key" version="7.0" class="oe_form_configuration"
+					create="true" edit="false" delete="false">
+					<div class="oe_inline">
+						<label for="google_api_key" string="Add new API Key" />
+						<field name="google_api_key" />
+					</div>
+				</form>
+			</field>
+		</record>
+
+
+	</data>
+</openerp>

@@ -2,7 +2,9 @@
 <openerp>
 	<data>
 
-		<menuitem name="MSDS" id="menu_nstda_sds" groups="nstdaperm.group_nstda_org02" />
+		<menuitem name="MSDS" id="menu_nstda_sds" 
+			groups="nstdaperm.group_nstda_org02" />
+<!-- 			groups="base.group_nstda_sds_user" /> -->
 		
 		<menuitem name="Menu" id="menu_nstda_sds_main" parent="menu_nstda_sds"
 			sequence="1" />
@@ -16,9 +18,10 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 			<field name="view_id" ref="view_nstda_sds_chemical_all_tree" />
-			<!-- <field name="context" eval="{'default_service': 0, 'search_default_filter_lab_dpm_id':0}"/> -->
+			<field name="context" eval="{}"/>
 			<!-- <field name="search_view_id" ref="nstda_sds_chemical_search_view" 
 				/> -->
+			<field name="domain">[('cas_no2','!=',False)]</field>
 		</record>
 
 		<record model="ir.actions.act_window" id="action_nstda_sds_chemical_self">
@@ -26,13 +29,12 @@
 			<field name="res_model">nstda.sds.chemical</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<!-- <field name="context">{'search_default_filter_lab_dpm_id': 1}</field> -->
 			<field name="context"
 				eval="{'default_service': 0, 'search_default_filter_create_uid':1}" />
 			<field name="search_view_id" ref="view_nstda_sds_chemical_search" />
 			<field name="view_id" ref="view_nstda_sds_chemical_self_tree" />
-			<field name="domain">[('lab_dpm_ids','!=',False)]</field>
-		</record>	
+			<field name="domain">[('cas_no2','!=',False),('lab_dpm_ids','!=',False)]</field>
+		</record>
 
 		<record model="ir.actions.act_window" id="action_nstda_sds_labdepartment">
 			<field name="name">สารเคมี/รังสี/แก๊ส ที่ใช้ใน LAB - MSDS</field>
@@ -40,10 +42,20 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 			<field name="search_view_id" ref="view_nstda_sds_labdepartment_search" />
-			<!-- <field name="context" eval="{'default_service': 0, 'search_default_filter_lab_dpm_id':0}"/> -->
-			<!-- <field name="search_view_id" ref="nstda_sds_chemical_search_view" 
-				/> -->
+			<field name="context" eval="{}"/>
+			<field name="domain">[('lab_dpm_id','!=',False)]</field>
 		</record>
+		
+		<record model="ir.actions.act_window" id="action_nstda_sds_chemical_except">
+			<field name="name">สารเคมี/รังสี/แก๊ส ที่ใช้ใน LAB - MSDS</field>
+			<field name="res_model">nstda.sds.chemical</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="context" eval="{}" />
+			<field name="search_view_id" ref="view_nstda_sds_chemical_search" />
+			<field name="view_id" ref="view_nstda_sds_chemical_all_tree" />
+			<field name="domain">[('sds_html_link','=',False)]</field>
+		</record>	
 	
 		<record model="ir.actions.act_window" id="action_nstda_sds_chemcasno">
 			<field name="name">CAS Number</field>
@@ -51,6 +63,14 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 			<field name="view_id" ref="view_nstda_sds_chemcasno_tree" />
+		</record>
+		
+		<record model="ir.actions.act_window" id="action_nstda_sds_googleapis_setting">
+			<field name="name">Add new API Key</field>
+			<field name="res_model">nstda.sds.googleapis</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
 		</record>
 		
 		<record model="ir.actions.act_window" id="action_nstda_sds_chemical_mas">
@@ -76,9 +96,13 @@
 			action="action_nstda_sds_labdepartment" parent="menu_nstda_sds_main"
 			sequence="3" groups="base.group_nstda_sds_user" />
 			
+		<menuitem name="Search/Missing" id="menu_nstda_sds_chemical_except"
+			action="action_nstda_sds_chemical_except" parent="menu_nstda_sds_main"
+			sequence="4" groups="base.group_nstda_sds_user" />
+			
 		<menuitem name="ห้องปฏิบัติการ (Department)" id="menu_nstda_sds_chemical_mas_tree" 
 			action="action_nstda_sds_chemical_mas" parent="menu_nstda_sds_administrator" 
-			sequence="4" groups="base.group_nstda_sds_user" />
+			sequence="5" groups="base.group_nstda_sds_user" />
 
 
 	</data>
