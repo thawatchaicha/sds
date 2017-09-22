@@ -51,3 +51,27 @@ class nstda_sds_labdepartment(models.Model):
     @api.depends('lab_dpm_name','storage_place')
     def cc_lab_storage(self):
         self.lab_storage = (self.lab_dpm_name or "")+ ' - ' +(self.storage_place or "")
+
+
+####################################################################################################
+
+class nstdamas_department(models.Model):
+    
+    @api.multi
+    def name_get(self):
+        result = []
+        for inv in self:
+            if inv.dpm_name:
+                result.append((inv.id, "%s" % (inv.dpm_name or '')))
+            elif inv.dpm_name_en:
+                result.append((inv.id, "%s" % (inv.dpm_name_en or '')))
+        return result
+    
+    
+    _name = 'nstdamas.department'
+    _inherit = 'nstdamas.department'
+    _rec_name = 'full_name'
+    
+    full_name = fields.Char(string='full_name', readonly=True, compute=name_get, store=False)
+    
+####################################################################################################

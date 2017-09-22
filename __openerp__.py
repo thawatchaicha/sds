@@ -23,8 +23,6 @@
                 'static/src/views/nstda_sds.xml',
                 
                 'data/nstda.sds.googleapis.csv',
-                'data/nstda.sds.chemcasno.csv',
-                'data/nstda.sds.chemical.csv',
         ],
         'demo': [],
         'installable': True,

@@ -3,8 +3,8 @@
 	<data>
 
 		<menuitem name="MSDS" id="menu_nstda_sds" 
-			groups="nstdaperm.group_nstda_org02" />
-<!-- 			groups="base.group_nstda_sds_user" /> -->
+			groups="base.group_nstda_sds_user" />
+<!-- 			groups="nstdaperm.group_nstda_org02" /> -->
 		
 		<menuitem name="Menu" id="menu_nstda_sds_main" parent="menu_nstda_sds"
 			sequence="1" />
