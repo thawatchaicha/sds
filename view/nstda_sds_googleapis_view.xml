@@ -13,6 +13,7 @@
 					<div class="oe_inline">
 						<label for="google_api_key" string="Add new API Key" />
 						<field name="google_api_key" />
+						<field name="remain_today" invisible="1" />
 					</div>
 				</form>
 			</field>

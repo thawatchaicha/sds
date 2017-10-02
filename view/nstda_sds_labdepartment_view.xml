@@ -15,7 +15,7 @@
 						<field name="storage_place" style="width: 200px" placeholder="กรุณากรอก ห้องที่เก็บรักษา" />
 						<field name="lab_dpm_name" invisible="1" />
 						<field name="lab_storage" invisible="1" />
-						<field name="dpm_lab_ids"  widget="many2many_tags" attrs="{'invisible':[('storage_place','=',False)]}" />
+						<field name="dpm_lab_ids" attrs="{'invisible':[('storage_place','=',False)]}" />
 					</group>
 				</sheet>
 				</form>

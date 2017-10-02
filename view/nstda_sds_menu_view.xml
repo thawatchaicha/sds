@@ -3,8 +3,8 @@
 	<data>
 
 		<menuitem name="MSDS" id="menu_nstda_sds" 
-			groups="base.group_nstda_sds_user" />
-<!-- 			groups="nstdaperm.group_nstda_org02" /> -->
+			groups="nstdaperm.group_nstda_org02" />
+<!-- 			groups="base.group_nstda_sds_user" /> -->
 		
 		<menuitem name="Menu" id="menu_nstda_sds_main" parent="menu_nstda_sds"
 			sequence="1" />
@@ -96,7 +96,7 @@
 			action="action_nstda_sds_labdepartment" parent="menu_nstda_sds_main"
 			sequence="3" groups="base.group_nstda_sds_user" />
 			
-		<menuitem name="Search/Missing" id="menu_nstda_sds_chemical_except"
+		<menuitem name="Missing/Unreadable" id="menu_nstda_sds_chemical_except"
 			action="action_nstda_sds_chemical_except" parent="menu_nstda_sds_main"
 			sequence="4" groups="base.group_nstda_sds_user" />
 			

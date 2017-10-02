@@ -25,8 +25,9 @@ class nstda_sds_googleapis(models.Model):
     _name = 'nstda.sds.googleapis'
     _inherit = 'res.config.settings'
     
-    google_api_key = fields.Char('Google API KEY', readonly=False, store=True, default=lambda self:self.env['nstda.sds.googleapis'].search([], limit=1, order="id DESC").google_api_key)
-    remain_today = fields.Integer('จำนวนค้นหาคงเหลือวันนี้')
+    
+    google_api_key = fields.Char('Google API KEY', readonly=False, store=True, default=lambda self:self.env['nstda.sds.googleapis'].search([], limit=1, order="remain_today ASC").google_api_key)
+    remain_today = fields.Integer('จำนวนค้นหาคงเหลือวันนี้', store=True)
     
     _sql_constraints = [
                         ('google_api_key_unique', 'unique(google_api_key)', 'Key มีอยู่ในระบบแล้ว'),

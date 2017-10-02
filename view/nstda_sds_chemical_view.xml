@@ -128,8 +128,7 @@
 						</footer>
 
 						<field name="is_lab_user" invisible="1" />
-						<field name="google_api_key" invisible="1" />
-
+						
 					</sheet>
 				</form>
 			</field>

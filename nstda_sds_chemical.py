@@ -28,8 +28,8 @@ import json
 
 GOOGLEAPIS = 'https://www.googleapis.com/customsearch/v1?q='
 CHEMTRACK = 'http://www.chemtrack.org/MSDSSG'
-GOOGLE_API_KEY = 'cx=004752995973544010898:ur2svigrmjs&key=AIzaSyDK6K1GGvHS7Xn8vU_Xfz4e__KtXZJoAns'
-mdsd_url = ''
+GOOGLE_API_KEY = ''
+msds_url = ''
 get_cas_no = ''
 co_chem_type = ''
 geturlcontent = ''
@@ -53,7 +53,7 @@ class nstda_sds_chemical(models.Model):
     
     
     @api.one
-    def put_sds_ir(self, mdsd_url, web_content, get_cas_no, co_chem_type):
+    def put_sds_ir(self, msds_url, web_content, get_cas_no, co_chem_type):
         
         try:
 #             export = self.env['ir.config_parameter'].get_param('filestore_path') or None
@@ -88,7 +88,7 @@ class nstda_sds_chemical(models.Model):
     @api.one
     def search_sigma_cas(self):
         
-        global GOOGLE_API_KEY
+        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([], limit=1, order="remain_today ASC").google_api_key
         
         try:
             get_cas_no = self.cas_no2.cas_no
@@ -101,27 +101,28 @@ class nstda_sds_chemical(models.Model):
             raise Warning('CAS Number เป็นกลุ่มตัวเลข 3ชุด คั่นด้วยเครื่องหมายขีด(-), โดยเลขชุดแรกประกอบไปด้วยจำนวนตัวเลข 2-7ตัว, ชุดที่สอง 2ตัว และชุดที่สาม 1ตัว')
     
         try:
-#             GOOGLE_API_KEY = self.google_api_key
-            mdsd_url = CHEMTRACK + '/Trf/msdst/msdst' + get_cas_no + '.html'
-            web_content = urllib2.urlopen(mdsd_url).read()
+            msds_url = CHEMTRACK + '/Trf/msdst/msdst' + get_cas_no + '.html'
+            
+            web_content = urllib2.urlopen(msds_url).read()
             geturlcontent = str(web_content)
             geturlcontent = geturlcontent.decode('cp874')
             geturlcontent = HTMLParser.HTMLParser().unescape(geturlcontent)
         except urllib2.HTTPError, e:
             self.search_merck_cas()
+            return
         
         try:
             co_chem_type = 'sigma'
-            self.put_sds_ir(mdsd_url, web_content, get_cas_no, co_chem_type)
-            self.map_sigma_content(mdsd_url, geturlcontent, get_cas_no, co_chem_type)
+            self.put_sds_ir(msds_url, web_content, get_cas_no, co_chem_type)
+            self.map_sigma_content(msds_url, geturlcontent, get_cas_no, co_chem_type)
         except:
-            raise Warning('ไม่พบ MSDS ดังกล่าว')
+            raise Warning('ไม่สามารถบันทึกข้อมูล(บางส่วน)ได้ เช่น ไฟล์ที่จะบันทึกมีปัญหา หรือมีฟิลด์บางฟิลด์ที่มีปัญหา')
 
         
     @api.one
     def search_merck_cas(self):
         
-        global GOOGLE_API_KEY
+        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([], limit=1, order="remain_today ASC").google_api_key
         
         try:
             get_cas_no = self.cas_no2.cas_no
@@ -134,38 +135,41 @@ class nstda_sds_chemical(models.Model):
             raise Warning('เลขทะเบียน CAS จะเป็นกลุ่มตัวเลข 3ชุด คั่นด้วยเครื่องหมายลบ(-), โดยเลขชุดแรกจะประกอบไปด้วยจำนวนตัวเลข 2-7ตัว, ชุดที่สอง 2ตัว และชุดที่สาม 1ตัว')
 
         try:
-#             GOOGLE_API_KEY = self.google_api_key
-            mdsd_url = GOOGLEAPIS + CHEMTRACK + '/Merck/msdst/+เลขรหัสซีเอเอส+' + plus_cas_no + '&' + GOOGLE_API_KEY
-            web_content = urllib2.urlopen(mdsd_url).read()
+            msds_url = GOOGLEAPIS + CHEMTRACK + '/Merck/msdst/+ซีเอเอส+' + plus_cas_no + '&' + GOOGLE_API_KEY
+            
+            get_remain = self.env['nstda.sds.googleapis'].search([('google_api_key','=',GOOGLE_API_KEY)])
+            get_remain.write({'remain_today':get_remain.remain_today+1,'google_api_key':GOOGLE_API_KEY})
+            
+            web_content = urllib2.urlopen(msds_url).read()
         except urllib2.HTTPError, e:
             raise Warning(e.fp.read())
         
         try:
             get_link = json.loads(web_content).values()[2][0]['link']
-            mdsd_url = get_link
+            msds_url = get_link
         except:
-            raise Warning('ไม่พบเลขทะเบียน CAS ดังกล่าว')
+            raise Warning('ไม่พบข้อมูลสารเคมีดังกล่าว กรุณาตรวจสอบที่ chemtrack.org')
         
         try:
-            web_content = urllib2.urlopen(mdsd_url).read()
+            web_content = urllib2.urlopen(msds_url).read()
             geturlcontent = str(web_content)
             geturlcontent = geturlcontent.decode('cp874')
             geturlcontent = HTMLParser.HTMLParser().unescape(geturlcontent)
         except urllib2.HTTPError, e:
-            raise Warning('ไม่พบ MSDS Content ดังกล่าว')
+            raise Warning('พบข้อมูลสารเคมีดังกล่าว แต่ตรวจพบปัญหา เช่น content, mapping อาจจะไม่ถูกต้อง')
         
         try:
             co_chem_type = 'merck'
             self.put_sds_ir(get_link, web_content, get_cas_no, co_chem_type)
-            self.map_merck_content(mdsd_url, geturlcontent, get_cas_no, co_chem_type)
+            self.map_merck_content(msds_url, geturlcontent, get_cas_no, co_chem_type)
         except:
-            raise Warning('ไม่พบ MSDS ดังกล่าว')
+            raise Warning('ไม่สามารถบันทึกข้อมูล(บางส่วน)ได้ เช่น ไฟล์ที่จะบันทึกมีปัญหา หรือมีฟิลด์บางฟิลด์ที่มีปัญหา')
         
         
     @api.one
     def search_sigma_name(self):
         
-        global GOOGLE_API_KEY
+        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([], limit=1, order="remain_today ASC").google_api_key
         
         try:
             get_product_name = self.product_name
@@ -174,39 +178,43 @@ class nstda_sds_chemical(models.Model):
             raise Warning('กรุณากรอกชื่อผลิตภัณฑ์')
     
         try:
-#             GOOGLE_API_KEY = self.google_api_key
-            mdsd_url = GOOGLEAPIS + CHEMTRACK + '/Trf/msdst/msdst+ชื่อผลิตภัณฑ์+' + plus_product_name + '&' + GOOGLE_API_KEY
-            web_content = urllib2.urlopen(mdsd_url).read()
+            msds_url = GOOGLEAPIS + CHEMTRACK + '/Trf/msdst/msdst+ชื่อผลิตภัณฑ์+' + plus_product_name + '&' + GOOGLE_API_KEY
+            
+            get_remain = self.env['nstda.sds.googleapis'].search([('google_api_key','=',GOOGLE_API_KEY)])
+            get_remain.write({'remain_today':get_remain.remain_today+1,'google_api_key':GOOGLE_API_KEY})
+            
+            web_content = urllib2.urlopen(msds_url).read()
         except urllib2.HTTPError, e:
             raise Warning(e.fp.read())
         
         try:
             get_link = json.loads(web_content).values()[2][0]['link']
             get_cas_no = json.loads(web_content).values()[2][0]['title']
-            mdsd_url = get_link 
+            msds_url = get_link 
         except:
             self.search_merck_name()
+            return
         
         try:
-            web_content = urllib2.urlopen(mdsd_url).read()
+            web_content = urllib2.urlopen(msds_url).read()
             geturlcontent = str(web_content)
             geturlcontent = geturlcontent.decode('cp874')
             geturlcontent = HTMLParser.HTMLParser().unescape(geturlcontent)
         except urllib2.HTTPError, e:
-            raise Warning('ไม่พบ MSDS Content ดังกล่าว')
+            raise Warning('พบข้อมูลสารเคมีดังกล่าว แต่ตรวจพบปัญหา เช่น content, mapping อาจจะไม่ถูกต้อง')
         
         try:
             co_chem_type = 'sigma'
-            self.put_sds_ir(mdsd_url, web_content, get_cas_no, co_chem_type)
-            self.map_sigma_content(mdsd_url, geturlcontent, get_cas_no, co_chem_type)
+            self.put_sds_ir(msds_url, web_content, get_cas_no, co_chem_type)
+            self.map_sigma_content(msds_url, geturlcontent, get_cas_no, co_chem_type)
         except:
-            raise Warning('ไม่พบ MSDS ดังกล่าว')
+            raise Warning('ไม่สามารถบันทึกข้อมูล(บางส่วน)ได้ เช่น ไฟล์ที่จะบันทึกมีปัญหา หรือมีฟิลด์บางฟิลด์ที่มีปัญหา')
 
     
     @api.one
     def search_merck_name(self):
         
-        global GOOGLE_API_KEY
+        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([], limit=1, order="remain_today ASC").google_api_key
         
         try:
             get_product_name = self.product_name
@@ -215,40 +223,43 @@ class nstda_sds_chemical(models.Model):
             raise Warning('กรุณากรอกชื่อผลิตภัณฑ์')
 
         try:
-#             GOOGLE_API_KEY = self.google_api_key
-            mdsd_url = GOOGLEAPIS + CHEMTRACK + '/Merck/msdst/+ชื่อผลิตภัณฑ์:+' + plus_product_name + '&' + GOOGLE_API_KEY
-            web_content = urllib2.urlopen(mdsd_url).read()
+            msds_url = GOOGLEAPIS + CHEMTRACK + '/Merck/msdst/+ชื่อผลิตภัณฑ์:+' + plus_product_name + '&' + GOOGLE_API_KEY
+            
+            get_remain = self.env['nstda.sds.googleapis'].search([('google_api_key','=',GOOGLE_API_KEY)])
+            get_remain.write({'remain_today':get_remain.remain_today+1,'google_api_key':GOOGLE_API_KEY})
+            
+            web_content = urllib2.urlopen(msds_url).read()
         except urllib2.HTTPError, e:
             raise Warning(e.fp.read())
         
         try:
             get_link = json.loads(web_content).values()[2][0]['link']
             get_cas_no = json.loads(web_content).values()[2][0]['title']
-            mdsd_url = get_link   
+            msds_url = get_link   
         except:
-            raise Warning('ไม่พบเลขทะเบียน CAS ดังกล่าว')
+            raise Warning('ไม่พบข้อมูลสารเคมีดังกล่าว กรุณาตรวจสอบที่ chemtrack.org')
         
         try:
-            web_content = urllib2.urlopen(mdsd_url).read()
+            web_content = urllib2.urlopen(msds_url).read()
             geturlcontent = str(web_content)
             geturlcontent = geturlcontent.decode('cp874')
             geturlcontent = HTMLParser.HTMLParser().unescape(geturlcontent)
         except urllib2.HTTPError, e:
-            raise Warning('ไม่พบ MSDS Content ดังกล่าว')
+            raise Warning('พบข้อมูลสารเคมีดังกล่าว แต่ตรวจพบปัญหา เช่น content, mapping อาจจะไม่ถูกต้อง')
         
         try:
             co_chem_type = 'merck'
-            self.put_sds_ir(mdsd_url, web_content, get_cas_no, co_chem_type)
-            self.map_merck_content(mdsd_url, geturlcontent, get_cas_no, co_chem_type)
+            self.put_sds_ir(msds_url, web_content, get_cas_no, co_chem_type)
+            self.map_merck_content(msds_url, geturlcontent, get_cas_no, co_chem_type)
         except:
-            raise Warning('ไม่พบ MSDS ดังกล่าว')
+            raise Warning('ไม่สามารถบันทึกข้อมูล(บางส่วน)ได้ เช่น ไฟล์ที่จะบันทึกมีปัญหา หรือมีฟิลด์บางฟิลด์ที่มีปัญหา')
         
         
     @api.one
-    def map_sigma_content(self, mdsd_url, geturlcontent, get_cas_no, co_chem_type):
+    def map_sigma_content(self, msds_url, geturlcontent, get_cas_no, co_chem_type):
         
         try:
-            self.sds_html_link = mdsd_url
+            self.sds_html_link = msds_url
             self.co_chem_type = co_chem_type
         except:
             pass
@@ -339,17 +350,17 @@ class nstda_sds_chemical(models.Model):
 
 
     @api.one
-    def map_merck_content(self, mdsd_url, geturlcontent, get_cas_no, co_chem_type):
+    def map_merck_content(self, msds_url, geturlcontent, get_cas_no, co_chem_type):
         
         try:
-            cas_no_re = re.compile(ur'(เลขรหัสซีเอเอส:).*?\,.*?\">(.*?)</FONT>', re.DOTALL)
+            cas_no_re = re.compile(ur'(.*?ซีเอเอส:).*?\,.*?\">(.*?)</FONT>', re.DOTALL)
             get_cas_no = re.search(cas_no_re, geturlcontent)
             get_cas_no = re.sub(r'\n|\r', "", get_cas_no.group(2))
         except:
             pass
         
         try:
-            self.sds_html_link = mdsd_url
+            self.sds_html_link = msds_url
             self.co_chem_type = co_chem_type
         except:
             pass
@@ -491,7 +502,7 @@ class nstda_sds_chemical(models.Model):
     
     lab_dpm_ids = fields.Many2many('nstda.sds.labdepartment', 'nstda_sds_chemical_labdepartment_rel', 'lab_dpm_ids', 'dpm_lab_ids', 'ห้องปฏิบัติการ', ondelete="cascade")
     is_lab_user = fields.Boolean('Check Lab', compute='_in_lab_user')
-    google_api_key = fields.Char('Google API Key', readonly=True, store=True, default=lambda self:self.env['nstda.sds.googleapis'].search([], limit=1, order="id DESC").google_api_key)
+    google_api_key = fields.Char('Google API Key', readonly=True)
     
     _sql_constraints = [
                         ('cas_no2_unique', 'unique(cas_no2)', 'Cas No. มีอยู่ในระบบแล้ว'),
