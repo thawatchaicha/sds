@@ -23,6 +23,7 @@
                 'static/src/views/nstda_sds.xml',
                 
                 'data/nstda.sds.googleapis.csv',
+                
         ],
         'demo': [],
         'installable': True,

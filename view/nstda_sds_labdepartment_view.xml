@@ -15,7 +15,10 @@
 						<field name="storage_place" style="width: 200px" placeholder="กรุณากรอก ห้องที่เก็บรักษา" />
 						<field name="lab_dpm_name" invisible="1" />
 						<field name="lab_storage" invisible="1" />
-						<field name="dpm_lab_ids" attrs="{'invisible':[('storage_place','=',False)]}" />
+						<field name="dpm_lab_ids" 
+							context="{'group_by':'cas_no', 'tree_view_ref' : 'nstda_sds.view_nstda_sds_chemical_find_tree'}"
+							attrs="{'invisible':[('is_more_chem','=',False)]}" />
+						<field name="is_more_chem" invisible="1" />	
 					</group>
 				</sheet>
 				</form>

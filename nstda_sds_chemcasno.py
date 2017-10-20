@@ -21,7 +21,6 @@ class nstda_sds_chemcasno(models.Model):
     _order = 'cas_no ASC'
     
     cas_no = fields.Char('CAS No.', size=12, require=True)
-    product_name = fields.Char('ชื่อผลิตภัณฑ์/ชื่อทางการค้า')
     is_search_success = fields.Boolean('Is Search Success ?', default=False, store=True, compute='set_is_search_success')
     
     _sql_constraints = [
@@ -33,15 +32,13 @@ class nstda_sds_chemcasno(models.Model):
     def _check_cas_no(self):
         get_cas_no = self.cas_no
         cas_pattern = r"(?!0)\d{2,7}-\d{2}-\d{1}(?!.)"
-        if re.match(cas_pattern, get_cas_no):
-            pass
-        else:
+        if not re.match(cas_pattern, get_cas_no):
             raise Warning('กรุณากรอกเลขทะเบียน CAS ให้ถูกต้อง')
         
         
     @api.one
     @api.depends('cas_no')
     def set_is_search_success(self):
-        get_html = self.env['nstda.sds.chemical'].search([('cas_no2','=',self.id)], limit=1).sds_html_link
-        if (get_html):
+        get_name = self.env['nstda.sds.chemical'].search([('cas_no2','=',self.id)], limit=1).product_name
+        if (get_name):
             self.is_search_success = True

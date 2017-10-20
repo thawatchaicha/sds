@@ -12,7 +12,6 @@
 				<sheet>
 					<group>
 						<field name="cas_no" />
-						<field name="product_name" invisible="1" />
 						<field name="is_search_success" invisible="1" />
 					</group>
 				</sheet>
@@ -28,7 +27,6 @@
 			<field name="arch" type="xml">
 				<tree string="nstda_sds_chemcasno_tree" class="oe_form_configuration" create="true" edit="false" delete="false" >
 					<field name="cas_no" />
-					<field name="product_name" invisible="1" />
 					<field name="is_search_success" invisible="1" />
 				</tree>
 			</field>			
@@ -41,7 +39,6 @@
 			<field name="arch" type="xml">
 				<search string="nstda_sds_chemcasno_search">
 					<field name="cas_no" string="CAS Number" filter_domain="[('cas_no','ilike',self)]" />
-					<field name="product_name" string="Product Name" filter_domain="[('product_name','ilike',self)]" />
 				</search>
 			</field>
 		</record>

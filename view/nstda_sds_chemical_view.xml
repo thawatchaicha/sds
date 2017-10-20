@@ -174,6 +174,22 @@
 				</tree>
 			</field>
 		</record>
+		
+		
+		<record model="ir.ui.view" id="view_nstda_sds_chemical_find_tree">
+			<field name="name">nstda.sds.chemical.tree</field>
+			<field name="model">nstda.sds.chemical</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="nstda_sds_chemical_find_tree" create="false"
+					edit="true" delete="true">
+					<field name="cas_no" />
+					<field name="product_name" />
+					<field name="chem_name" />
+					<field name="is_lab_user" invisible="1" />
+				</tree>
+			</field>
+		</record>
 
 
 		<!-- Search View -->
@@ -204,8 +220,8 @@
 					</group>
 
 					<group expand="0" string="Filter">
-						<filter name="filter_create_uid" string="My"
-							domain="[('create_uid','=',uid)]" />
+						<filter name="filter_is_lab_user" string="My"
+							domain="[('is_lab_user','=',True)]" />
 					</group>
 
 				</search>

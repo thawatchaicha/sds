@@ -38,6 +38,11 @@ web_content = ''
 class nstda_sds_chemical(models.Model):
     
     
+    @api.model
+    def _search_is_lab_user(self, operator, value):
+        return
+    
+    
     def _needaction_count(self, cr, uid, domain=None, context=None):
         """ Get the number of actions uid has to perform. """
         dom = []
@@ -88,7 +93,7 @@ class nstda_sds_chemical(models.Model):
     @api.one
     def search_sigma_cas(self):
         
-        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([], limit=1, order="remain_today ASC").google_api_key
+        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([('active_key', '!=', False)], limit=1, order="remain_today ASC").google_api_key
         
         try:
             get_cas_no = self.cas_no2.cas_no
@@ -122,7 +127,7 @@ class nstda_sds_chemical(models.Model):
     @api.one
     def search_merck_cas(self):
         
-        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([], limit=1, order="remain_today ASC").google_api_key
+        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([('active_key', '!=', False)], limit=1, order="remain_today ASC").google_api_key
         
         try:
             get_cas_no = self.cas_no2.cas_no
@@ -169,7 +174,7 @@ class nstda_sds_chemical(models.Model):
     @api.one
     def search_sigma_name(self):
         
-        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([], limit=1, order="remain_today ASC").google_api_key
+        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([('active_key', '!=', False)], limit=1, order="remain_today ASC").google_api_key
         
         try:
             get_product_name = self.product_name
@@ -214,7 +219,7 @@ class nstda_sds_chemical(models.Model):
     @api.one
     def search_merck_name(self):
         
-        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([], limit=1, order="remain_today ASC").google_api_key
+        GOOGLE_API_KEY = self.env['nstda.sds.googleapis'].search([('active_key', '!=', False)], limit=1, order="remain_today ASC").google_api_key
         
         try:
             get_product_name = self.product_name
@@ -272,7 +277,7 @@ class nstda_sds_chemical(models.Model):
             cas_no = casno_model.search([('cas_no', '=', get_cas_no)])
             self.cas_no2 = cas_no.id
             
-            if self.sds_html_link != None:
+            if self.product_name != None:
                 cas_no.write({'is_search_success': True})
         except:
             pass
@@ -373,7 +378,7 @@ class nstda_sds_chemical(models.Model):
             cas_no = casno_model.search([('cas_no', '=', get_cas_no)])
             self.cas_no2 = cas_no.id
             
-            if self.sds_html_link != None:
+            if self.product_name != None:
                 cas_no.write({'is_search_success': True})
         except:
             pass
@@ -458,6 +463,9 @@ class nstda_sds_chemical(models.Model):
     _rec_name = 'cas_no'
     _order = 'cas_no ASC'
     _inherit = ['ir.needaction_mixin']
+    _defaults = {
+        'user_id': lambda self, cr, uid, ctx: uid,
+    }
     
     co_chem_type = fields.Selection([
                                      ("merck", "MERCK Schuchardt"),
@@ -468,7 +476,7 @@ class nstda_sds_chemical(models.Model):
     product_name = fields.Char('ชื่อผลิตภัณฑ์/ทางการค้า')
     hazardous_substances = fields.Char('สูตรเคมี/สูตรโมเลกูล')
     cas_no = fields.Char('CAS No.', size=12, readonly=True, compute='set_cas_no', store=True)
-    cas_no2 = fields.Many2one('nstda.sds.chemcasno', string='CAS No.', size=12, require=False, readonly=False, domain=[('is_search_success', '!=', True)], default=lambda self:self.env['nstda.sds.chemcasno'].search([('is_search_success', '=', False)], limit=1, order="id ASC").id)
+    cas_no2 = fields.Many2one('nstda.sds.chemcasno', string='CAS No.', size=12, require=False, readonly=False, domain=[('is_search_success', '!=', True)], default=lambda self:self.env['nstda.sds.chemcasno'].search([('is_search_success', '!=', True)], limit=1, order="id ASC").id)
     chem_properties = fields.Selection([
                                         ("ประเภท:1", "Class 1"),
                                         ("ประเภท:2", "Class 2"),
@@ -501,7 +509,7 @@ class nstda_sds_chemical(models.Model):
     sds_html_link = fields.Char('ข้อมูลความปลอดภัย (SDS)')
     
     lab_dpm_ids = fields.Many2many('nstda.sds.labdepartment', 'nstda_sds_chemical_labdepartment_rel', 'lab_dpm_ids', 'dpm_lab_ids', 'ห้องปฏิบัติการ', ondelete="cascade")
-    is_lab_user = fields.Boolean('Check Lab', compute='_in_lab_user')
+    is_lab_user = fields.Boolean('Check Lab', compute='_in_lab_user', search=_search_is_lab_user)
     google_api_key = fields.Char('Google API Key', readonly=True)
     
     _sql_constraints = [
@@ -509,9 +517,9 @@ class nstda_sds_chemical(models.Model):
     ]
     
     
-    @api.constrains('sds_html_link')
-    def _check_sds_html_link(self):
-        if self.sds_html_link == None or self.sds_html_link is None:
+    @api.constrains('cas_no')
+    def _check_cas_no(self):
+        if self.cas_no == False or self.cas_no is None:
             raise ValidationError("ไม่สามารถบันทึกข้อมูลได้")
         
     
@@ -521,6 +529,8 @@ class nstda_sds_chemical(models.Model):
     def set_cas_no(self):
         if (self.cas_no2.cas_no):
             self.cas_no = self.cas_no2.cas_no
+        else:
+            pass
             
     
     @api.one
@@ -529,6 +539,14 @@ class nstda_sds_chemical(models.Model):
         user_id = self.env['nstdamas.employee'].search([('emp_rusers_id', '=', self._uid)])
         if (user_id):
             user_dpm = user_id.emp_dpm_id.id
+            
+            for x in self.lab_dpm_ids:
+                if user_dpm == x.lab_dpm_id.id:
+                    self.is_lab_user = True
+                else:
+                    self.is_lab_user =False
+        else:
+            self.is_lab_user = False
 
 
     @api.model

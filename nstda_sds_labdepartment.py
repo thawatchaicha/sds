@@ -35,16 +35,28 @@ class nstda_sds_labdepartment(models.Model):
     lab_dpm_id = fields.Many2one('nstdamas.department', string="Lab (Department)", domain=[('dpm_id', '=like', '2%')], 
                                    default=lambda self:self.env['nstdamas.employee'].search([('emp_rusers_id','=',self._uid)], limit=1).emp_dpm_id, required=True)
     
+    storage_place = fields.Char('ห้องที่เก็บรักษา')
+    
     lab_dpm_name = fields.Char(related='lab_dpm_id.dpm_name', store=False, readonly=True)
     lab_storage = fields.Char(compute='cc_lab_storage', store=False, readonly=False)
     
     dpm_lab_ids = fields.Many2many('nstda.sds.chemical', 'nstda_sds_chemical_labdepartment_rel', 'dpm_lab_ids', 'lab_dpm_ids', 'สารเคมีในห้องปฏิบัติการ', ondelete="cascade")
     
-    storage_place = fields.Char('ห้องที่เก็บรักษา')
+    is_more_chem = fields.Boolean('Check more Chemical in lab', compute='check_more_chem')
     
     _sql_constraints = [
                         ('dpm_storage_unique', 'unique(lab_dpm_id,storage_place)', 'ห้องปฏิบัติการและห้องที่เก็บรักษา มีอยู่ในระบบแล้ว'),
     ]
+    
+    
+    @api.one
+    @api.onchange('storage_place')
+    def check_more_chem(self):
+        find_self_lab = self.env['nstda.sds.labdepartment'].search([('lab_dpm_id','=',self.lab_dpm_id.id),('storage_place','=',self.storage_place)], limit=1)
+        if (find_self_lab):
+            self.is_more_chem = True
+        else:
+            self.is_more_chem = False
     
     
     @api.one

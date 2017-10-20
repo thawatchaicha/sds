@@ -8,15 +8,25 @@
 			<field name="model">nstda.sds.googleapis</field>
 			<field name="type">form</field>
 			<field name="arch" type="xml">
-				<form string="Add new API Key" version="7.0" class="oe_form_configuration"
-					create="true" edit="false" delete="false">
-					<div class="oe_inline">
-						<label for="google_api_key" string="Add new API Key" />
+				<form string="API Key" create="false" edit="true" delete="false" >
+					<group>
 						<field name="google_api_key" />
-						<field name="remain_today" invisible="1" />
-					</div>
+						<field name="active_key" />
+					</group>
 				</form>
 			</field>
+		</record>
+		
+		<record model="ir.ui.view" id="view_nstda_sds_googleapis_tree">
+			<field name="name">nstda.sds.googleapis.tree</field>
+			<field name="model">nstda.sds.googleapis</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="API Key" create="true" edit="true" delete="false" editable="top" >
+					<field name="google_api_key" />
+					<field name="active_key" />
+				</tree>
+			</field>			
 		</record>
 
 
